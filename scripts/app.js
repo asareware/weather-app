@@ -1,77 +1,74 @@
-import { getForecast } from "./forecast.js";
+// Cache key DOM elements for this template
+var searchForm = document.getElementById("search-form");
+var cityInput = document.getElementById("city-input");
+var cityPhoto = document.getElementById("city-photo");
+var timeLabel = document.getElementById("time-label");
+var photoNote = document.getElementById("photo-note");
+var cityName = document.getElementById("city-name");
+var weatherTemp = document.getElementById("weather-temp");
+var weatherSummary = document.getElementById("weather-summary");
+var localTime = document.getElementById("local-time");
 
-const form = document.querySelector("#location-form");
-const input = document.querySelector("#location-input");
-const statusEl = document.querySelector("#status");
-const currentEl = document.querySelector("[data-current]");
-const forecastEl = document.querySelector("[data-forecast]");
-const locationHeading = document.querySelector("#current-location");
+// Stock photos to distinguish day versus night states
+var previewImages = {
+  day: "https://images.unsplash.com/photo-1496588152823-e89e7b4779b5?auto=format&fit=crop&w=1600&q=80",
+  night: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80"
+};
 
-form.addEventListener("submit", (event) => {
+// Respond to the search form without calling any API
+searchForm.addEventListener("submit", function handleSearch(event) {
   event.preventDefault();
-  const location = input.value.trim();
-  if (!location) {
-    setStatus("Please enter a location to search.");
+
+  var query = cityInput.value.trim();
+
+  if (query.length === 0) {
+    // Reset to a neutral state when nothing is typed
+    applyPreviewState("City name", "Country name", "Weather description", "72", "22", "Local time");
     return;
   }
-  loadForecast(location);
+
+  // Populate the card with placeholder values that use the user's query
+  applyPreviewState(query, "Country name placeholder", "Weather summary placeholder", "72", "22", buildLocalTimeString());
 });
 
-async function loadForecast(location) {
-  setStatus("Loading forecast...");
-  try {
-    const data = await getForecast(location);
-    renderCurrent(data);
-    renderForecast(data.forecast);
-    setStatus(`Updated ${data.updatedAt || "just now"}`);
-  } catch (error) {
-    console.error(error);
-    setStatus("Could not load forecast. Please try again.");
-  }
-}
+// Choose a day or night image based on the visitor's current time
+function selectPreviewImage() {
+  var currentHour = new Date().getHours();
+  var isDaytime = currentHour >= 6 && currentHour < 18;
 
-function renderCurrent(data) {
-  if (!data || !data.current) {
-    currentEl.innerHTML = `<p class="muted">No weather data to show yet.</p>`;
-    return;
+  if (isDaytime) {
+    return {
+      url: previewImages.day,
+      label: "Day preview"
+    };
   }
 
-  locationHeading.textContent = data.location;
-  const { temp, feelsLike, humidity, wind, conditions } = data.current;
-
-  currentEl.innerHTML = `
-    <div class="current__temp">${temp}&deg;C</div>
-    <p>${conditions}</p>
-    <div class="pill">Feels like ${feelsLike}&deg;C</div>
-    <p class="muted">Humidity: ${humidity}%</p>
-    <p class="muted">Wind: ${wind}</p>
-  `;
+  return {
+    url: previewImages.night,
+    label: "Night preview"
+  };
 }
 
-function renderForecast(days = []) {
-  if (!days.length) {
-    forecastEl.innerHTML = `<p class="muted">Add a city to see the five day outlook.</p>`;
-    return;
-  }
+// Apply placeholder values to the UI to show the layout
+function applyPreviewState(cityValue, countryValue, weatherValue, tempFValue, tempCValue, timeValue) {
+  var photoChoice = selectPreviewImage();
+  var cityCountry = cityValue + ", " + countryValue;
 
-  const cards = days
-    .map(
-      (day) => `
-        <article class="forecast-card">
-          <h3>${day.day}</h3>
-          <p>${day.conditions}</p>
-          <p><strong>${day.high}&deg; / ${day.low}&deg;</strong></p>
-        </article>
-      `
-    )
-    .join("");
+  cityPhoto.style.backgroundImage = "url('" + photoChoice.url + "')";
+  timeLabel.textContent = photoChoice.label;
+  photoNote.textContent = "Static photo. Replace with a city image service.";
 
-  forecastEl.innerHTML = cards;
+  cityName.textContent = cityCountry;
+  weatherTemp.textContent = tempFValue + "°F / " + tempCValue + "°C";
+  weatherSummary.textContent = weatherValue;
+  localTime.textContent = timeValue;
 }
 
-// Load a default view for quick preview.
-loadForecast("Accra, Ghana");
-
-function setStatus(message) {
-  statusEl.textContent = message;
+// Format a readable time for the preview card
+function buildLocalTimeString() {
+  var now = new Date();
+  return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
+// Initialize the preview card on load
+applyPreviewState("Accra", "Ghana", "Partly cloudy preview", "82", "28", buildLocalTimeString());
