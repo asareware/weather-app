@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__content">
+      <p class="eyebrow">Asareware Labs</p>
+      <h1>Weather at a glance</h1>
+      <p class="lede">Search any city to see the current snapshot and a quick five day outlook.</p>
+      <form id="location-form" class="search">
+        <label class="search__label" for="location-input">City or location</label>
+        <div class="search__controls">
+          <input id="location-input" name="location" type="text" placeholder="e.g. Accra, London, New York" required>
+          <button type="submit">Get forecast</button>
+        </div>
+        <p class="search__hint" id="status"></p>
+      </form>
+    </div>
+    <div class="hero__accent"></div>
+  </header>
+
+  <main class="layout">
+    <section class="card" aria-live="polite">
+      <div class="card__header">
+        <p class="eyebrow" id="current-location">No location yet</p>
+        <h2>Current conditions</h2>
+      </div>
+      <div class="current" data-current>
+        <p class="muted">Try searching for a city to load weather data.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__header">
+        <p class="eyebrow">Next five days</p>
+        <h2>Forecast</h2>
+      </div>
+      <div class="forecast-grid" data-forecast>
+        <p class="muted">Your forecast will appear here.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Demo data only. Wire up your API calls in <code>js/forecast.js</code>.</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
